@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Banco de dados local (recriado automaticamente com dados de exemplo)
+vendas.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Preferências locais (gerado ao alternar o tema)
+config.json
+
+# Relatórios exportados
+exports/
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+
+# Logs e temporários
+*.log
+*.tmp
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores/IDE
+.vscode/
+.idea/
+*.swp
