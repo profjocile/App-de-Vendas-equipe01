@@ -540,11 +540,18 @@ def pagina_relatorios(ctx, data_ini, data_fim, erro=None):
     url_csv = (
         f"/relatorios/exportar?data_ini={quote(data_ini)}&data_fim={quote(data_fim)}"
     )
+    url_excel = (
+        "/relatorios/exportar-excel"
+        f"?data_ini={quote(data_ini)}&data_fim={quote(data_fim)}"
+    )
 
     conteudo = f"""
     <div class="cabecalho-pagina">
       <div><h2>Relatórios</h2><p>Analise as vendas por período e baixe os dados.</p></div>
-      <a class="botao secundario" href="{url_csv}">{ui.icone('download')} Baixar CSV</a>
+      <div class="acoes-cabecalho">
+        <a class="botao primario" href="{url_excel}">{ui.icone('download')} Baixar Excel</a>
+        <a class="botao secundario" href="{url_csv}">{ui.icone('download')} Baixar CSV</a>
+      </div>
     </div>
     {alerta}
     <form method="get" action="/relatorios" class="card filtros">

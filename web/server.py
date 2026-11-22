@@ -218,11 +218,11 @@ class Aplicacao(BaseHTTPRequestHandler):
     def _redirecionar(self, destino):
         self._enviar(303, "text/html; charset=utf-8", "", {"Location": destino})
 
-    def _csv(self, conteudo, nome_arquivo):
+    def _arquivo(self, conteudo, nome_arquivo, tipo):
         nome = quote(nome_arquivo)
         self._enviar(
             200,
-            "text/csv; charset=utf-8",
+            tipo,
             conteudo,
             {
                 "Content-Disposition": (
@@ -230,6 +230,16 @@ class Aplicacao(BaseHTTPRequestHandler):
                     f"filename*=UTF-8''{nome}"
                 )
             },
+        )
+
+    def _csv(self, conteudo, nome_arquivo):
+        self._arquivo(conteudo, nome_arquivo, "text/csv; charset=utf-8")
+
+    def _xlsx(self, conteudo, nome_arquivo):
+        self._arquivo(
+            conteudo,
+            nome_arquivo,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 
     def _erro(self, codigo, mensagem):
@@ -683,6 +693,33 @@ class Aplicacao(BaseHTTPRequestHandler):
                 return
         self._csv(conteudo, nome)
 
+    def relatorios_exportar_excel(self):
+        if not self._exigir_admin():
+            return
+        query = self._query()
+        padrao_ini, padrao_fim = _periodo_padrao()
+        try:
+            data_ini, data_fim = _normalizar_periodo(
+                query.get("data_ini") or padrao_ini,
+                query.get("data_fim") or padrao_fim,
+            )
+        except ValueError as erro:
+            self._flash("erro", str(erro))
+            self._redirecionar("/relatorios")
+            return
+        nome = f"relatorio_vendas_{data_ini}_{data_fim}.xlsx"
+        with tempfile.TemporaryDirectory() as pasta:
+            caminho = os.path.join(pasta, nome)
+            try:
+                relatorio.exportar_excel(caminho, data_ini, data_fim)
+                with open(caminho, "rb") as arquivo:
+                    conteudo = arquivo.read()
+            except OSError as erro:
+                self._flash("erro", f"Não foi possível gerar a planilha: {erro}")
+                self._redirecionar("/relatorios")
+                return
+        self._xlsx(conteudo, nome)
+
     def usuarios_get(self):
         if not self._exigir_admin():
             return
@@ -799,6 +836,11 @@ ROTAS = [
     ("POST", r"^/historico/(?P<venda_id>\d+)/cancelar$", Aplicacao.historico_cancelar),
     ("GET", r"^/relatorios$", Aplicacao.relatorios_get),
     ("GET", r"^/relatorios/exportar$", Aplicacao.relatorios_exportar),
+    (
+        "GET",
+        r"^/relatorios/exportar-excel$",
+        Aplicacao.relatorios_exportar_excel,
+    ),
     ("GET", r"^/usuarios$", Aplicacao.usuarios_get),
     ("POST", r"^/usuarios/salvar$", Aplicacao.usuarios_salvar),
     ("POST", r"^/usuarios/senha$", Aplicacao.usuarios_senha),

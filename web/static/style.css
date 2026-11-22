@@ -362,6 +362,12 @@ h3 {
   font-size: 13.5px;
 }
 
+.acoes-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .cards {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1297,7 +1303,8 @@ h3 {
     gap: 12px;
   }
 
-  .cabecalho-pagina .botao {
+  .cabecalho-pagina .botao,
+  .acoes-cabecalho {
     width: 100%;
   }
 

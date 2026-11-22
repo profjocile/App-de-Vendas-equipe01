@@ -87,3 +87,14 @@ Feche o sistema, apague o arquivo `vendas.db` e execute novamente `python main.p
 ## Documentação completa
 
 O planejamento, modelo de banco, regras de negócio e roteiro de apresentação estão em [`guia.md`](guia.md).
+
+A documentação de requisitos está em [`docs/requisitos-funcionais.md`](docs/requisitos-funcionais.md) — requisitos, regras de negócio, modelo de dados, testes e critérios de aceitação.
+
+## Testes
+
+A suíte automatizada fica em [`test/`](test) e usa **pytest** com banco temporário isolado:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+python -m pytest
+```

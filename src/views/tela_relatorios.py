@@ -113,7 +113,7 @@ class TelaRelatorios(tk.Frame):
         )
         card_filtros.pack(fill="x", padx=28, pady=(0, 14))
         filtros = tk.Frame(card_filtros, bg=CORES["branco"])
-        filtros.pack(fill="x", padx=16, pady=12)
+        filtros.pack(fill="x", padx=16, pady=(12, 6))
 
         tk.Label(
             filtros,
@@ -141,15 +141,25 @@ class TelaRelatorios(tk.Frame):
         criar_botao(filtros, "Gerar", self.gerar, icone="refresh").pack(
             side="left", padx=(12, 0)
         )
+
+        acoes = tk.Frame(card_filtros, bg=CORES["branco"])
+        acoes.pack(fill="x", padx=16, pady=(0, 12))
         criar_botao(
-            filtros,
+            acoes,
+            "Exportar Excel",
+            self._exportar_excel,
+            "Secondary.TButton",
+            icone="download",
+        ).pack(side="left")
+        criar_botao(
+            acoes,
             "Exportar CSV",
             self._exportar,
             "Secondary.TButton",
             icone="download",
         ).pack(side="left", padx=(8, 0))
         criar_botao(
-            filtros,
+            acoes,
             "Abrir no Excel",
             self._abrir_no_excel,
             "Secondary.TButton",
@@ -340,6 +350,38 @@ class TelaRelatorios(tk.Frame):
             "Relatório exportado",
         )
 
+    def _exportar_excel(self):
+        try:
+            data_ini, data_fim = self._periodo()
+        except ValueError as erro:
+            notificar_erro(self, str(erro), "Período inválido")
+            return
+
+        pasta_exports = os.path.join(BASE_DIR, "exports")
+        os.makedirs(pasta_exports, exist_ok=True)
+        caminho = filedialog.asksaveasfilename(
+            parent=self,
+            title="Salvar relatório em Excel",
+            initialdir=pasta_exports,
+            initialfile=f"relatorio_vendas_{data_ini}_{data_fim}.xlsx",
+            defaultextension=".xlsx",
+            filetypes=[("Planilha do Excel", "*.xlsx")],
+        )
+        if not caminho:
+            return
+        try:
+            total = relatorio.exportar_excel(caminho, data_ini, data_fim)
+        except OSError as erro:
+            notificar_erro(
+                self, f"Não foi possível salvar o arquivo:\n{erro}", "Erro ao exportar"
+            )
+            return
+        notificar_sucesso(
+            self,
+            f"{total} venda(s) exportada(s) para:\n{caminho}",
+            "Planilha exportada",
+        )
+
     def _abrir_no_excel(self):
         try:
             data_ini, data_fim = self._periodo()
@@ -350,10 +392,10 @@ class TelaRelatorios(tk.Frame):
         pasta_exports = os.path.join(BASE_DIR, "exports")
         os.makedirs(pasta_exports, exist_ok=True)
         caminho = os.path.join(
-            pasta_exports, f"relatorio_vendas_{data_ini}_{data_fim}.csv"
+            pasta_exports, f"relatorio_vendas_{data_ini}_{data_fim}.xlsx"
         )
         try:
-            total = relatorio.exportar_csv(caminho, data_ini, data_fim)
+            total = relatorio.exportar_excel(caminho, data_ini, data_fim)
         except OSError as erro:
             notificar_erro(
                 self,
